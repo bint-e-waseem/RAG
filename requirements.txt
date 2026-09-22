@@ -8,3 +8,5 @@ chromadb
 sentence-transformers
 python-dotenv
 unstructured
+torch
+torchvision
