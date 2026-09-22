@@ -1,20 +1,13 @@
-streamlit==1.38.0
-
-# Pinned to the 0.3.x series on purpose.
-# langchain>=1.0 moved create_retrieval_chain out of `langchain.chains`
-# into a separate `langchain-classic` package — that mismatch is what
-# caused the ModuleNotFoundError you were seeing.
-langchain==0.3.7
-langchain-community==0.3.7
-langchain-core==0.3.15
-langchain-text-splitters==0.3.2
-langchain-google-genai==2.0.5
-
-chromadb==0.5.20
-pysqlite3-binary==0.5.2.post3
-
-sentence-transformers==3.2.1
-beautifulsoup4==4.12.3
-python-dotenv==1.0.1
-
-torch==2.4.1
+streamlit
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+langchain-google-genai
+chromadb
+pysqlite3-binary
+sentence-transformers
+beautifulsoup4
+python-dotenv
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
