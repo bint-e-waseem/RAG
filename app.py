@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.document_loaders import UnstructuredURLLoader
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -22,11 +22,15 @@ def build_rag_chain():
         'https://gcu.edu.pk/fee-structure.php',
         'https://gcu.edu.pk/financial-aid.php',
     ]
-    loader = UnstructuredURLLoader(urls=urls)
+    loader = WebBaseLoader(urls)
     data = loader.load()
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     docs = text_splitter.split_documents(data)
+
+    if not docs:
+        st.error("GCU websites se data load nahi ho saka. Operational status check karein.")
+        st.stop()
 
     # Use a free local embedding model (no OpenAI key needed)
     embeddings = HuggingFaceEmbeddings(
