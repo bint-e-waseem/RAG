@@ -1,8 +1,7 @@
 streamlit
-langchain
+langchain==0.2.16
 langchain-community
 langchain-core
-langchain-classic
 langchain-text-splitters
 langchain-google-genai
 chromadb
