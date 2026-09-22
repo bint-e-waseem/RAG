@@ -1,3 +1,11 @@
+# --- Must be the very first thing in the file, before chromadb is imported ---
+# Streamlit Cloud's base image ships an old system sqlite3 (<3.35), which
+# chromadb refuses to run on. Swapping in the pysqlite3-binary wheel fixes it.
+__import__("pysqlite3")
+import sys
+sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+
+import os
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.document_loaders import WebBaseLoader
@@ -11,16 +19,33 @@ from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 load_dotenv()
 
+# On Streamlit Cloud there is no .env file in the repo (and there shouldn't
+# be one, since it would leak your key). Set the key in the app's
+# "Settings -> Secrets" panel instead, as:
+#   GOOGLE_API_KEY = "your-key-here"
+# st.secrets then exposes it, so we mirror it into the env var the
+# LangChain Google integration expects.
+if "GOOGLE_API_KEY" in st.secrets:
+    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+
+if not os.getenv("GOOGLE_API_KEY"):
+    st.error(
+        "GOOGLE_API_KEY nahi mila. Streamlit Cloud app ke "
+        "Settings → Secrets mein GOOGLE_API_KEY = \"your-key\" add karein, "
+        "phir app ko reboot karein."
+    )
+    st.stop()
+
 st.title("🎓 GCU University Admission Assistant")
 
 
 @st.cache_resource(show_spinner="Loading GCU data...")
 def build_rag_chain():
     urls = [
-        'https://gcu.edu.pk/',
-        'https://gcu.edu.pk/administration.php',
-        'https://gcu.edu.pk/fee-structure.php',
-        'https://gcu.edu.pk/financial-aid.php',
+        "https://gcu.edu.pk/",
+        "https://gcu.edu.pk/administration.php",
+        "https://gcu.edu.pk/fee-structure.php",
+        "https://gcu.edu.pk/financial-aid.php",
     ]
     loader = WebBaseLoader(urls)
     data = loader.load()
@@ -32,7 +57,7 @@ def build_rag_chain():
         st.error("GCU websites se data load nahi ho saka. Operational status check karein.")
         st.stop()
 
-    # Use a free local embedding model (no OpenAI key needed)
+    # Free local embedding model (no OpenAI key needed)
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
